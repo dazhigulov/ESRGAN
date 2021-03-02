@@ -1,0 +1,9 @@
+Questions To Ask:
+
+	- is reading all the files with cv2 possible?
+	
+	- Should we convert to PIL image on the fly?
+	
+	- what size is good for random crop? are all data same size?
+	
+	- how choose random downsampling method?
