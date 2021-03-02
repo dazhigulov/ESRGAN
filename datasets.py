@@ -21,12 +21,13 @@ def denormalize(tensors):
 
 
 class ImageDataset(Dataset):
-    def __init__(self, root, hr_shape):
+    def __init__(self, root, hr_shape, rand_crop_w=4320, rand_crop_h=4320):
         hr_height, hr_width = hr_shape
         # Transforms for low resolution images and high resolution images
         self.lr_transform = transforms.Compose(
             [
-                transforms.Resize((hr_height // 4, hr_height // 4), Image.BICUBIC),
+                transforms.RandomCrop(size=(rand_crop_w, rand_crop_h))
+                transforms.Resize((hr_height // 8, hr_height // 8), Image.BICUBIC),
                 transforms.ToTensor(),
                 transforms.Normalize(mean, std),
             ]
@@ -42,9 +43,19 @@ class ImageDataset(Dataset):
         self.files = sorted(glob.glob(root + "/*.*"))
 
     def __getitem__(self, index):
-        img = Image.open(self.files[index % len(self.files)])
-        img_lr = self.lr_transform(img)
-        img_hr = self.hr_transform(img)
+        #img = Image.open(self.files[index % len(self.files)])
+
+        #Read EXR file with CV2
+        img = cv2.imread(self.files[index % len(self.files)],\
+              cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+        
+        #Convert to PIL Image
+        img_hr = Image.fromarray(img, 'RGB')
+        
+        #Donwsample 
+        img_lr = self.lr_transform(img_hr)
+        
+        #img_hr = self.hr_transform(img)
 
         return {"lr": img_lr, "hr": img_hr}
 
