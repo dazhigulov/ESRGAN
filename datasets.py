@@ -14,7 +14,7 @@ mean = np.array([0.485, 0.456, 0.406])
 std = np.array([0.229, 0.224, 0.225])
 
 #Downsampling Container
-DOWN_SAMPLING_CONTAINER = [Image.BICUBIC, Image.bilinear]
+DOWN_SAMPLING_CONTAINER = [Image.BICUBIC, Image.BILNEAR]
 
 
 def denormalize(tensors):
