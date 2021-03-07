@@ -28,14 +28,14 @@ class ImageDataset(Dataset):
             [
                 transforms.Resize((hr_height // 4, hr_height // 4), Image.BICUBIC),
                 transforms.ToTensor(),
-                transforms.Normalize(mean, std),
+                # transforms.Normalize(mean, std),
             ]
         )
         self.hr_transform = transforms.Compose(
             [
                 transforms.Resize((hr_height, hr_height), Image.BICUBIC),
                 transforms.ToTensor(),
-                transforms.Normalize(mean, std),
+                # transforms.Normalize(mean, std),
             ]
         )
 
