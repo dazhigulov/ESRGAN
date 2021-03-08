@@ -81,22 +81,49 @@ optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt
 
 Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.Tensor
 
-dataloader = DataLoader(
+PATH = "/home/adias/projects/def-mahsa77/dataset/8K/"
+train_paths = [PATH+"c01_Fireworks_willow_8K",
+                PATH+"c02_Fireworks_longshot_8K",
+                PATH+"c03_Fireworks_scrollingtext_8K",
+                PATH+"c04_Fireworks_chrysanthemum_8K",
+                PATH+"c05_Fireworks_barrage_8K",
+                PATH+"c07_Drama_sea_8K",
+                PATH+"c08_Drama_sunset_8K",
+                PATH+"c09_SwimRace_breaststroke_8K",
+                PATH+"c10_SwimRace_crawl_8K",
+                PATH+"c11_SwimRace_backstroke_8K",    
+                PATH+"c13_Volleyball_crawlingtext_8K",
+                PATH+"c14_Volleyball_follow_8K",
+                PATH+"c16_Paddock_follow_8K",
+                PATH+"c17_HorseRace_homestretch_8K"
+                ]
+dev_paths = [PATH+"c06_Drama_standingup_8K",
+            PATH+"c12_Volleyball_fixed_8K",
+            PATH+"c15_Paddock_fixed_8K"] 
+
+train_loader = DataLoader(
     #***Changed the path***#
-    ImageDataset("/home/adias/projects/def-mahsa77/dataset/8K/c01_Fireworks_willow_8K/", hr_shape=hr_shape),
+    ImageDataset(train_paths, hr_shape=hr_shape),
     batch_size=opt.batch_size,
     shuffle=True,
     num_workers=opt.n_cpu,
 )
+'''dev_loader = DataLoader(
+    #***Changed the path***#
+    ImageDataset(dev_paths, hr_shape=hr_shape),
+    batch_size=opt.batch_size,
+    shuffle=True,
+    num_workers=opt.n_cpu,
+)'''
 
 # ----------
 #  Training
 # ----------
 
 for epoch in range(opt.epoch, opt.n_epochs):
-    for i, imgs in enumerate(dataloader):
+    for i, imgs in enumerate(train_loader):
 
-        batches_done = epoch * len(dataloader) + i
+        batches_done = epoch * len(train_loader) + i
 
         # Configure model input
         imgs_lr = Variable(imgs["lr"].type(Tensor))
@@ -124,7 +151,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
             optimizer_G.step()
             print(
                 "[Epoch %d/%d] [Batch %d/%d] [G pixel: %f]"
-                % (epoch, opt.n_epochs, i, len(dataloader), loss_pixel.item())
+                % (epoch, opt.n_epochs, i, len(train_loader), loss_pixel.item())
             )
             continue
 
@@ -175,7 +202,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
                 epoch,
                 opt.n_epochs,
                 i,
-                len(dataloader),
+                len(train_loader),
                 loss_D.item(),
                 loss_G.item(),
                 loss_content.item(),

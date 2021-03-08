@@ -43,8 +43,10 @@ class ImageDataset(Dataset):
                 #transforms.Normalize(mean, std),
             ]
         )
-
-        self.files = sorted(glob.glob(root + "/*.*"))
+        images = []
+        for dir in root:
+            images += glob.glob(dir+"/*.*")
+        self.files = sorted(images)
 
     def __getitem__(self, index):
         #img = Image.open(self.files[index % len(self.files)])
