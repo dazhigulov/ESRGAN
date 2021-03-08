@@ -52,11 +52,9 @@ class ImageDataset(Dataset):
         #img = Image.open(self.files[index % len(self.files)])
         img_orig = cv2.imread(self.files[index % len(self.files)],\
               cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
-        x = randrange(0,4320-512)
-        y = randrange(0,7680-512)
-        xx = x+512
-        yy = y+512
-        final_img = img_orig[x:xx,y:yy]
+        width = randrange(0,len(img_orig[0,:])-512)
+        height = randrange(0,len(img_orig[:,0])-512)
+        final_img = img_orig[height:height+512,width:width+512]
         #print("ORIG SIZE X: "+str(len(img_orig[:][0])))
         #print("ORIG SIZE Y: "+str(len(img_orig[0][:])))
         #print(final_img.shape)
