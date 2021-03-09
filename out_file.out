@@ -1,0 +1,32 @@
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) nixpkgs/16.09
+
+The following have been reloaded with a version change:
+  1) StdEnv/2016.4 => StdEnv/2018.3
+  2) gcccore/.5.4.0 => gcccore/.7.3.0
+  3) icc/.2016.4.258 => icc/.2018.3.222
+  4) ifort/.2016.4.258 => ifort/.2018.3.222
+  5) imkl/11.3.4.258 => imkl/2018.3.222
+  6) intel/2016.4 => intel/2018.3
+  7) openmpi/2.1.1 => openmpi/3.1.2
+
+Lmod has detected the following error: The following module(s) are unknown:
+"torch"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore-cache load "torch"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+New python executable in /localscratch/molyaiy.63462708.0/env/bin/python
+Installing setuptools, pip, wheel...done.
+pip install --no-index torch torchvision
+  File "esrgan.py", line 63
+    discriminator = Discriminator(input_shape=(opt.channels, *hr_shape)).to(device)
+                                                             ^
+SyntaxError: invalid syntax

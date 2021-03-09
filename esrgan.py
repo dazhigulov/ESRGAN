@@ -50,6 +50,7 @@ parser.add_argument("--residual_blocks", type=int, default=23, help="number of r
 parser.add_argument("--warmup_batches", type=int, default=500, help="number of batches with pixel-wise loss only")
 parser.add_argument("--lambda_adv", type=float, default=5e-3, help="adversarial loss weight")
 parser.add_argument("--lambda_pixel", type=float, default=1e-2, help="pixel-wise loss weight")
+parser.add_argument("--dataset_path", type=str, required=True, help="path to dataset")
 opt = parser.parse_args()
 print(opt)
 
@@ -81,8 +82,29 @@ optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt
 
 Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.Tensor
 
+PATH = opt.dataset_path
+
+train_paths = [PATH+"c01_Fireworks_willow_8K",
+                PATH+"c02_Fireworks_longshot_8K",
+                PATH+"c03_Fireworks_scrollingtext_8K",
+                PATH+"c04_Fireworks_chrysanthemum_8K",
+                PATH+"c05_Fireworks_barrage_8K",
+                PATH+"c07_Drama_sea_8K",
+                PATH+"c08_Drama_sunset_8K",
+                PATH+"c09_SwimRace_breaststroke_8K",
+                PATH+"c10_SwimRace_crawl_8K",
+                PATH+"c11_SwimRace_backstroke_8K",    
+                PATH+"c13_Volleyball_crawlingtext_8K",
+                PATH+"c14_Volleyball_follow_8K",
+                PATH+"c16_Paddock_follow_8K",
+                PATH+"c17_HorseRace_homestretch_8K"
+                ]
+dev_paths = [PATH+"c06_Drama_standingup_8K",
+            PATH+"c12_Volleyball_fixed_8K",
+            PATH+"c15_Paddock_fixed_8K"] 
+
 dataloader = DataLoader(
-    ImageDataset("../../data/%s" % opt.dataset_name, hr_shape=hr_shape),
+    ImageDataset(train_paths, hr_shape=hr_shape),
     batch_size=opt.batch_size,
     shuffle=True,
     num_workers=opt.n_cpu,
