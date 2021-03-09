@@ -31,8 +31,8 @@ class ImageDataset(Dataset):
         self.crop_transform = transforms.Compose(
             [
                 transforms.ToPILImage(),
-                transforms.RandomCrop(self.image_size * self.scale_factor),
-                transform.ToTensor()
+                transforms.RandomCrop(512),
+                transforms.ToTensor()
             ]
         )
         
@@ -42,15 +42,12 @@ class ImageDataset(Dataset):
                 transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
                 transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
                 transforms.ToTensor()
-                #transforms.Normalize(mean, std),
             ]
         )
         
         self.hr_transform = transforms.Compose(
             [
-                transforms.ToTensor(),
-                #transforms.Resize((hr_height, hr_height), Image.BICUBIC),
-                #transforms.Normalize(mean, std),
+                transforms.ToTensor()
             ]
         )
 
