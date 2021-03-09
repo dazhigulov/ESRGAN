@@ -28,12 +28,20 @@ class ImageDataset(Dataset):
         SAMPLING = [Image.BICUBIC, Image.BILINEAR, Image.NEAREST]
 
         # Transforms for low resolution images and high resolution images
-        self.lr_transform = transforms.Compose(
+        self.crop_transform = transforms.Compose(
             [
-                transforms.ToTensor(),
+                transforms.ToPILImage(),
+                transforms.RandomCrop(self.image_size * self.scale_factor),
+                transform.ToTensor()
+            ]
+        )
+        
+        self.lr_transform = transforms.Compose(
+            [   transforms.ToPILImage(),
                 transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
                 transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
                 transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
+                transforms.ToTensor()
                 #transforms.Normalize(mean, std),
             ]
         )
@@ -58,17 +66,11 @@ class ImageDataset(Dataset):
         #Read EXR file with CV2
         img = cv2.imread(self.files[index % len(self.files)],\
               cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
-        
-        #Convert to PIL Image
-        #img_hr = Image.fromarray(img, 'RGB')
 
-        width = randrange(0,len(img[0,:])-512)
-        height = randrange(0,len(img[:,0])-512)
-        final_img = img[height:height+512,width:width+512]
-
-        #Donwsample 
-        img_lr = self.lr_transform(final_img)
-        img_hr = self.hr_transform(final_img)
+        #Donwsample
+        img_cropped = self.crop_transform(img)
+        img_lr = self.lr_transform(img_cropped)
+        img_hr = self.hr_transform(img_cropped)
 
         return {"lr": img_lr, "hr": img_hr}
 
