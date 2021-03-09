@@ -56,7 +56,6 @@ class ImageDataset(Dataset):
             images += glob.glob(dir+"/*.*")
         self.files = sorted(images)
 
-
     def __getitem__(self, index):
         #img = Image.open(self.files[index % len(self.files)])
 
@@ -65,7 +64,7 @@ class ImageDataset(Dataset):
               cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
 
         #Donwsample
-        img_cropped = self.crop_transform(img)
+        img_cropped = self.crop_transform(torch.Tensor(img))
         img_lr = self.lr_transform(img_cropped)
         img_hr = self.hr_transform(img_cropped)
 
