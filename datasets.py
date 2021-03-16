@@ -23,23 +23,24 @@ def denormalize(tensors):
 
 
 class ImageDataset(Dataset):
-    def __init__(self, root, hr_shape, rand_crop_w=4320, rand_crop_h=4320):
+    def __init__(self, root, hr_shape):
         hr_height, hr_width = hr_shape
+
         SAMPLING = [Image.BICUBIC, Image.BILINEAR, Image.NEAREST]
 
         # Transforms for low resolution images and high resolution images
         self.crop_transform = transforms.Compose(
             [
                 transforms.ToPILImage(),
-                transforms.RandomCrop(512),
+                transforms.RandomCrop(hr_shape),
             ]
         )
         
         self.lr_transform = transforms.Compose(
             [   
-                transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
-                transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
-                transforms.Resize((rand_crop_w // 2, rand_crop_h // 2), SAMPLING[randrange(0,len(SAMPLING))]),
+                transforms.Resize((hr_height // 2, hr_width // 2), SAMPLING[randrange(0,len(SAMPLING))]),
+                transforms.Resize((hr_height // 4, hr_width // 4), SAMPLING[randrange(0,len(SAMPLING))]),
+                transforms.Resize((hr_height // 8, hr_width // 8), SAMPLING[randrange(0,len(SAMPLING))]),
                 transforms.ToTensor()
             ]
         )
@@ -56,18 +57,21 @@ class ImageDataset(Dataset):
         self.files = sorted(images)
 
     def __getitem__(self, index):
-        #img = Image.open(self.files[index % len(self.files)])
 
         #Read EXR file with CV2
-        img = cv2.imread(self.files[index % len(self.files)],\
+        img = cv2.imread(self.files[index],\
               cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
-        print("Input shape: "+str(img.shape))
+        print("Original image shape: "+str(img.shape))
+
         #Downsample
-        print(torch.Tensor(img).shape)
-        print(transforms.ToPILImage()(transforms.ToTensor()(img)).size)
-        img_cropped = self.crop_transform(transforms.ToTensor()(img))
-        img_lr = self.lr_transform(img_cropped)
-        img_hr = self.hr_transform(img_cropped)
+        img = self.crop_transform(transforms.ToTensor()(img))
+        print("Cropped image shape: "+str(img.size))
+        img_lr = self.lr_transform(img)
+        img_lr = img_lr.permute(1,2,0)
+        print("LR image shape: "+str(img_lr.size()))
+        img_hr = self.hr_transform(img)
+        img_hr = img_hr.permute(1,2,0)
+        print("HR image shape: "+str(img_hr.size()))
 
         return {"lr": img_lr, "hr": img_hr}
 

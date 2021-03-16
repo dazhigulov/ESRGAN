@@ -35,7 +35,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--epoch", type=int, default=0, help="epoch to start training from")
 parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
 parser.add_argument("--dataset_name", type=str, default="img_align_celeba", help="name of the dataset")
-parser.add_argument("--batch_size", type=int, default=4, help="size of the batches")
+parser.add_argument("--batch_size", type=int, default=1, help="size of the batches")
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.9, help="adam: decay of first order momentum of gradient")
 parser.add_argument("--b2", type=float, default=0.999, help="adam: decay of first order momentum of gradient")
@@ -50,11 +50,13 @@ parser.add_argument("--residual_blocks", type=int, default=23, help="number of r
 parser.add_argument("--warmup_batches", type=int, default=500, help="number of batches with pixel-wise loss only")
 parser.add_argument("--lambda_adv", type=float, default=5e-3, help="adversarial loss weight")
 parser.add_argument("--lambda_pixel", type=float, default=1e-2, help="pixel-wise loss weight")
+parser.add_argument("--dataset_path", type=str, required=True, help="path to dataset")
 opt = parser.parse_args()
 print(opt)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+if torch.cuda.is_available(): print("\n\nCUDA is available\n\n")
+else: print("\n\nUsing CPU\n\n")
 hr_shape = (opt.hr_height, opt.hr_width)
 
 # Initialize generator and discriminator
@@ -81,7 +83,8 @@ optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt
 
 Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.Tensor
 
-PATH = "/home/adias/projects/def-mahsa77/dataset/8K/"
+PATH = opt.dataset_path
+
 train_paths = [PATH+"c01_Fireworks_willow_8K",
                 PATH+"c02_Fireworks_longshot_8K",
                 PATH+"c03_Fireworks_scrollingtext_8K",
@@ -101,29 +104,21 @@ dev_paths = [PATH+"c06_Drama_standingup_8K",
             PATH+"c12_Volleyball_fixed_8K",
             PATH+"c15_Paddock_fixed_8K"] 
 
-train_loader = DataLoader(
-    #***Changed the path***#
+dataloader = DataLoader(
     ImageDataset(train_paths, hr_shape=hr_shape),
     batch_size=opt.batch_size,
     shuffle=True,
     num_workers=opt.n_cpu,
 )
-'''dev_loader = DataLoader(
-    #***Changed the path***#
-    ImageDataset(dev_paths, hr_shape=hr_shape),
-    batch_size=opt.batch_size,
-    shuffle=True,
-    num_workers=opt.n_cpu,
-)'''
 
 # ----------
 #  Training
 # ----------
 
 for epoch in range(opt.epoch, opt.n_epochs):
-    for i, imgs in enumerate(train_loader):
+    for i, imgs in enumerate(dataloader):
 
-        batches_done = epoch * len(train_loader) + i
+        batches_done = epoch * len(dataloader) + i
 
         # Configure model input
         imgs_lr = Variable(imgs["lr"].type(Tensor))
@@ -151,7 +146,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
             optimizer_G.step()
             print(
                 "[Epoch %d/%d] [Batch %d/%d] [G pixel: %f]"
-                % (epoch, opt.n_epochs, i, len(train_loader), loss_pixel.item())
+                % (epoch, opt.n_epochs, i, len(dataloader), loss_pixel.item())
             )
             continue
 
@@ -202,7 +197,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
                 epoch,
                 opt.n_epochs,
                 i,
-                len(train_loader),
+                len(dataloader),
                 loss_D.item(),
                 loss_G.item(),
                 loss_content.item(),
