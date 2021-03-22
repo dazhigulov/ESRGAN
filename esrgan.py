@@ -60,7 +60,7 @@ else: print("\n\nUsing CPU\n\n")
 hr_shape = (opt.hr_height, opt.hr_width)
 
 # Initialize generator and discriminator
-generator = GeneratorRRDB(opt.channels, filters=64, num_res_blocks=opt.residual_blocks).to(device)
+generator = GeneratorRRDB(opt.channels, filters=64, num_res_blocks=opt.residual_blocks, num_upsample=3).to(device)
 discriminator = Discriminator(input_shape=(opt.channels, *hr_shape)).to(device)
 feature_extractor = FeatureExtractor().to(device)
 
@@ -122,7 +122,9 @@ for epoch in range(opt.epoch, opt.n_epochs):
 
         # Configure model input
         imgs_lr = Variable(imgs["lr"].type(Tensor))
+        #print("low res image ", imgs_lr.shape)
         imgs_hr = Variable(imgs["hr"].type(Tensor))
+        #print("high res image ", imgs_hr.shape)
 
         # Adversarial ground truths
         valid = Variable(Tensor(np.ones((imgs_lr.size(0), *discriminator.output_shape))), requires_grad=False)
@@ -138,6 +140,8 @@ for epoch in range(opt.epoch, opt.n_epochs):
         gen_hr = generator(imgs_lr)
 
         # Measure pixel-wise loss against ground truth
+        #print("generated hr shape ", gen_hr.shape)
+        #print("ground truth hr shape ", imgs_hr.shape)
         loss_pixel = criterion_pixel(gen_hr, imgs_hr)
 
         if batches_done < opt.warmup_batches:

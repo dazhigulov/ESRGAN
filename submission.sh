@@ -11,10 +11,10 @@
 #SBATCH --mail-type=begin        # send email when job begins
 #SBATCH --mail-type=end          # send email when job ends
 #SBATCH --mail-type=fail         # send email if job fails
-#SBATCH --mail-user=noobfromkz@gmail.com
+#SBATCH --mail-user=mohamad.ol95@gmail.com
 
 
-DATA_DIR='/home/adias/projects/def-mahsa77/dataset/8K/'
+DATA_DIR='/home/molyaiy/projects/def-mahsa77/dataset/8K/'
 
 module load python/3.6
 
@@ -26,6 +26,6 @@ pip install -U pip
 pip install -U setuptools
 pip install --no-index opencv-python
 
-python esrgan.py --batch_size 1 --hr_height 64 --hr_width 64 --dataset_path $DATA_DIR
+python esrgan.py --batch_size 8 --hr_height 64 --hr_width 64 --dataset_path $DATA_DIR
 
 
