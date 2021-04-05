@@ -14,7 +14,7 @@
 #SBATCH --mail-user=mohamad.ol95@gmail.com
 
 
-DATA_DIR='/home/molyaiy/projects/def-mahsa77/dataset/8K/'
+DATA_DIR='/home/yuweiluo/projects/def-mahsa77/dataset/8K/'
 
 module load python/3.6
 

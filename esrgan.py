@@ -9,6 +9,7 @@ Instrustion on running the script:
 """
 
 import argparse
+import cv2
 import os
 import numpy as np
 import math
@@ -28,7 +29,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-os.makedirs("images/training", exist_ok=True)
+os.makedirs("images/png", exist_ok=True)
+os.makedirs("images/exr", exist_ok=True)
 os.makedirs("saved_models", exist_ok=True)
 
 parser = argparse.ArgumentParser()
@@ -47,6 +49,7 @@ parser.add_argument("--channels", type=int, default=3, help="number of image cha
 parser.add_argument("--sample_interval", type=int, default=100, help="interval between saving image samples")
 parser.add_argument("--checkpoint_interval", type=int, default=5000, help="batch interval between model checkpoints")
 parser.add_argument("--residual_blocks", type=int, default=23, help="number of residual blocks in the generator")
+#change the warmup batches one
 parser.add_argument("--warmup_batches", type=int, default=500, help="number of batches with pixel-wise loss only")
 parser.add_argument("--lambda_adv", type=float, default=5e-3, help="adversarial loss weight")
 parser.add_argument("--lambda_pixel", type=float, default=1e-2, help="pixel-wise loss weight")
@@ -212,9 +215,13 @@ for epoch in range(opt.epoch, opt.n_epochs):
 
         if batches_done % opt.sample_interval == 0:
             # Save image grid with upsampled inputs and ESRGAN outputs
-            imgs_lr = nn.functional.interpolate(imgs_lr, scale_factor=4)
-            img_grid = denormalize(torch.cat((imgs_lr, gen_hr), -1))
-            save_image(img_grid, "images/training/%d.png" % batches_done, nrow=1, normalize=False)
+            imgs_lr = nn.functional.interpolate(imgs_lr, scale_factor=8)
+            img_grid = torch.cat((imgs_lr, gen_hr), -1)
+            save_image(img_grid, "images/png/%d.png" % batches_done, nrow=1, normalize=False)
+            #need change from png to exr
+            originalImage = cv2.imread("images/png/%d.png" % batches_done).astype(np.float32)
+            cv2.imwrite("images/exr/%d.exr" % batches_done, originalImage)
+
 
         if batches_done % opt.checkpoint_interval == 0:
             # Save model checkpoints
