@@ -49,8 +49,8 @@ parser.add_argument("--channels", type=int, default=3, help="number of image cha
 parser.add_argument("--sample_interval", type=int, default=100, help="interval between saving image samples")
 parser.add_argument("--checkpoint_interval", type=int, default=5000, help="batch interval between model checkpoints")
 parser.add_argument("--residual_blocks", type=int, default=23, help="number of residual blocks in the generator")
-#change the warmup batches one
-parser.add_argument("--warmup_batches", type=int, default=500, help="number of batches with pixel-wise loss only")
+# change the warmup batches one
+parser.add_argument("--warmup_batches", type=int, default=28000, help="number of batches with pixel-wise loss only")
 parser.add_argument("--lambda_adv", type=float, default=5e-3, help="adversarial loss weight")
 parser.add_argument("--lambda_pixel", type=float, default=1e-2, help="pixel-wise loss weight")
 parser.add_argument("--dataset_path", type=str, required=True, help="path to dataset")
@@ -58,8 +58,10 @@ opt = parser.parse_args()
 print(opt)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-if torch.cuda.is_available(): print("\n\nCUDA is available\n\n")
-else: print("\n\nUsing CPU\n\n")
+if torch.cuda.is_available():
+    print("\n\nCUDA is available\n\n")
+else:
+    print("\n\nUsing CPU\n\n")
 hr_shape = (opt.hr_height, opt.hr_width)
 
 # Initialize generator and discriminator
@@ -88,24 +90,24 @@ Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.Tensor
 
 PATH = opt.dataset_path
 
-train_paths = [PATH+"c01_Fireworks_willow_8K",
-                PATH+"c02_Fireworks_longshot_8K",
-                PATH+"c03_Fireworks_scrollingtext_8K",
-                PATH+"c04_Fireworks_chrysanthemum_8K",
-                PATH+"c05_Fireworks_barrage_8K",
-                PATH+"c07_Drama_sea_8K",
-                PATH+"c08_Drama_sunset_8K",
-                PATH+"c09_SwimRace_breaststroke_8K",
-                PATH+"c10_SwimRace_crawl_8K",
-                PATH+"c11_SwimRace_backstroke_8K",    
-                PATH+"c13_Volleyball_crawlingtext_8K",
-                PATH+"c14_Volleyball_follow_8K",
-                PATH+"c16_Paddock_follow_8K",
-                PATH+"c17_HorseRace_homestretch_8K"
-                ]
-dev_paths = [PATH+"c06_Drama_standingup_8K",
-            PATH+"c12_Volleyball_fixed_8K",
-            PATH+"c15_Paddock_fixed_8K"] 
+train_paths = [PATH + "c01_Fireworks_willow_8K",
+               PATH + "c02_Fireworks_longshot_8K",
+               PATH + "c03_Fireworks_scrollingtext_8K",
+               PATH + "c04_Fireworks_chrysanthemum_8K",
+               PATH + "c05_Fireworks_barrage_8K",
+               PATH + "c07_Drama_sea_8K",
+               PATH + "c08_Drama_sunset_8K",
+               PATH + "c09_SwimRace_breaststroke_8K",
+               PATH + "c10_SwimRace_crawl_8K",
+               PATH + "c11_SwimRace_backstroke_8K",
+               PATH + "c13_Volleyball_crawlingtext_8K",
+               PATH + "c14_Volleyball_follow_8K",
+               PATH + "c16_Paddock_follow_8K",
+               PATH + "c17_HorseRace_homestretch_8K"
+               ]
+dev_paths = [PATH + "c06_Drama_standingup_8K",
+             PATH + "c12_Volleyball_fixed_8K",
+             PATH + "c15_Paddock_fixed_8K"]
 
 dataloader = DataLoader(
     ImageDataset(train_paths, hr_shape=hr_shape),
@@ -125,9 +127,9 @@ for epoch in range(opt.epoch, opt.n_epochs):
 
         # Configure model input
         imgs_lr = Variable(imgs["lr"].type(Tensor))
-        #print("low res image ", imgs_lr.shape)
+        # print("low res image ", imgs_lr.shape)
         imgs_hr = Variable(imgs["hr"].type(Tensor))
-        #print("high res image ", imgs_hr.shape)
+        # print("high res image ", imgs_hr.shape)
 
         # Adversarial ground truths
         valid = Variable(Tensor(np.ones((imgs_lr.size(0), *discriminator.output_shape))), requires_grad=False)
@@ -143,12 +145,13 @@ for epoch in range(opt.epoch, opt.n_epochs):
         gen_hr = generator(imgs_lr)
 
         # Measure pixel-wise loss against ground truth
-        #print("generated hr shape ", gen_hr.shape)
-        #print("ground truth hr shape ", imgs_hr.shape)
+        # print("generated hr shape ", gen_hr.shape)
+        # print("ground truth hr shape ", imgs_hr.shape)
         loss_pixel = criterion_pixel(gen_hr, imgs_hr)
 
         if batches_done < opt.warmup_batches:
             # Warm-up (pixel-wise loss only)
+
             loss_pixel.backward()
             optimizer_G.step()
             print(
@@ -216,14 +219,15 @@ for epoch in range(opt.epoch, opt.n_epochs):
         if batches_done % opt.sample_interval == 0:
             # Save image grid with upsampled inputs and ESRGAN outputs
             imgs_lr = nn.functional.interpolate(imgs_lr, scale_factor=8)
-            img_grid = torch.cat((imgs_lr, gen_hr), -1)
+            # print shape changed
+            img_grid = torch.cat((imgs_lr, gen_hr, imgs_hr), -1)
+            # print shape
             save_image(img_grid, "images/png/%d.png" % batches_done, nrow=1, normalize=False)
-            #need change from png to exr
+            # need change from png to exr
             originalImage = cv2.imread("images/png/%d.png" % batches_done).astype(np.float32)
             cv2.imwrite("images/exr/%d.exr" % batches_done, originalImage)
-
 
         if batches_done % opt.checkpoint_interval == 0:
             # Save model checkpoints
             torch.save(generator.state_dict(), "saved_models/generator_%d.pth" % epoch)
-            torch.save(discriminator.state_dict(), "saved_models/discriminator_%d.pth" %epoch)
+            torch.save(discriminator.state_dict(), "saved_models/discriminator_%d.pth" % epoch)

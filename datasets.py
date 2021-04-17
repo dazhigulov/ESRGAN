@@ -32,7 +32,7 @@ class ImageDataset(Dataset):
         self.crop_transform = transforms.Compose(
             [
                 transforms.ToPILImage(),
-                transforms.RandomCrop(64),
+                transforms.RandomCrop(hr_shape),
                 transforms.ToTensor()
             ]
         )
@@ -40,9 +40,9 @@ class ImageDataset(Dataset):
         self.lr_transform = transforms.Compose(
             [   
                 transforms.ToPILImage(),
-                transforms.Resize((32, 32), SAMPLING[randrange(0,len(SAMPLING))]),
-                transforms.Resize((16, 16), SAMPLING[randrange(0,len(SAMPLING))]),
-                transforms.Resize((8, 8), SAMPLING[randrange(0,len(SAMPLING))]),
+                transforms.Resize((hr_height // 2, hr_width // 2), SAMPLING[randrange(0,len(SAMPLING))]),
+                transforms.Resize((hr_height // 4, hr_width // 4), SAMPLING[randrange(0,len(SAMPLING))]),
+                transforms.Resize((hr_height // 8, hr_width // 8), SAMPLING[randrange(0,len(SAMPLING))]),
                 transforms.ToTensor()
             ]
         )
@@ -66,20 +66,16 @@ class ImageDataset(Dataset):
               cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
         #print("Original image shape: "+str(img.shape))
 
-        #***** Random Crop ******
+        #Downsample
         img = self.crop_transform(transforms.ToTensor()(img))
-        img_shape_fixed = img.permute(1,2,0)
-        #print("Cropped image shape fixed: "+str(img_shape_fixed.shape))
-
-        #***** high-res transforms *****
+        print("Cropped image shape: "+str(img.shape))
+        #print("Cropped image shape after permutation: "+str(img_lr.shape))
+        img_lr = self.lr_transform(img)
+        #img_lr = img_lr.permute(1,2,0)
+        print("LR image shape: "+str(img_lr.size()))
+        #img_hr = self.hr_transform(img)
         img_hr = img
-        #img_hr = self.hr_transform(img_shape_fixed)
-        #print("HR image shape: "+str(img_hr.size()))
-
-        
-        #***** low-res transforms ******
-        img_lr = self.lr_transform(img_shape_fixed)
-        #print("LR image shape: "+str(img_lr.size()))
+        print("HR image shape: "+str(img_hr.size()))
 
         return {"lr": img_lr, "hr": img_hr}
 
