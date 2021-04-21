@@ -76,6 +76,7 @@ feature_extractor.eval()
 criterion_GAN = torch.nn.BCEWithLogitsLoss().to(device)
 criterion_content = torch.nn.L1Loss().to(device)
 criterion_pixel = torch.nn.L1Loss().to(device)
+criterion_psnr = nn.MSELoss().to(device)
 
 if opt.epoch != 0:
     # Load pretrained models
@@ -160,6 +161,10 @@ for epoch in range(opt.epoch, opt.n_epochs):
             )
             continue
 
+
+        #PSNR
+        psnr = 10 * torch.log10(1.0 / criterion_psnr(imgs_hr, gen_hr)).item()
+
         # Extract validity predictions from discriminator
         pred_real = discriminator(imgs_hr).detach()
         pred_fake = discriminator(gen_hr)
@@ -202,7 +207,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
         # --------------
 
         print(
-            "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f, content: %f, adv: %f, pixel: %f]"
+            "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f, content: %f, adv: %f, pixel: %f] [PSNR: %f]"
             % (
                 epoch,
                 opt.n_epochs,
@@ -213,6 +218,7 @@ for epoch in range(opt.epoch, opt.n_epochs):
                 loss_content.item(),
                 loss_GAN.item(),
                 loss_pixel.item(),
+                psnr
             )
         )
 
