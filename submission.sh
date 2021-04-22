@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=1-59:0
+#SBATCH --time=20:0:0
 #SBATCH --account=def-mahsa77
 #SBATCH --job-name=4k8k
 #SBATCH --ntasks=1
@@ -11,7 +11,7 @@
 #SBATCH --mail-type=begin        # send email when job begins
 #SBATCH --mail-type=end          # send email when job ends
 #SBATCH --mail-type=fail         # send email if job fails
-#SBATCH --mail-user=weskerlyw@gmail.com
+#SBATCH --mail-user=noobfromkz@gmail.com
 
 
 
@@ -25,4 +25,4 @@ pip install -U pip
 pip install -U setuptools
 pip install --no-index opencv-python
 
-python esrgan.py --batch_size 4 --hr_height 512 --hr_width 512 --channels 3 --dataset_path '/home/molyaiy/projects/def-mahsa77/dataset/8K/'
+python esrgan.py --batch_size 4 --hr_height 512 --hr_width 512 --channels 3 --epoch 125 --dataset_path '/home/adias/projects/def-mahsa77/dataset/8K/'
